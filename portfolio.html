@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naandheny SV | Connect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            cursor: none;
+        }
+
+        /* Hide default cursor */
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Custom Cursor Styles */
+        .custom-cursor {
+            background: radial-gradient(circle, rgba(230, 208, 206, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+            mix-blend-mode: multiply;
+        }
+    </style>
+</head>
+
+<body class="bg-[#FDFBF7] text-[#2C2C2C]">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- ICONS (Lucide React Replacements) ---
+        const Icon = ({ children, className, size = 24, ...props }) => (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={size}
+                height={size}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={className}
+                {...props}
+            >
+                {children}
+            </svg>
+        );
+
+        const MoveRight = (props) => <Icon {...props}><path d="M18 8L22 12L18 16" /><path d="M2 12H22" /></Icon>;
+        const ArrowUpRight = (props) => <Icon {...props}><path d="M7 7h10v10" /><path d="M7 17L17 7" /></Icon>;
+        const Copy = (props) => <Icon {...props}><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></Icon>;
+        const Mail = (props) => <Icon {...props}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></Icon>;
+        const Linkedin = (props) => <Icon {...props}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect width="4" height="12" x="2" y="9" /><circle cx="4" cy="4" r="2" /></Icon>;
+        const Github = (props) => <Icon {...props}><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" /><path d="M9 18c-4.51 2-5-2-7-2" /></Icon>;
+        const Heart = (props) => <Icon {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></Icon>;
+        const Star = (props) => <Icon {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></Icon>;
+        const Coffee = (props) => <Icon {...props}><path d="M17 8h1a4 4 0 1 1 0 8h-1" /><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" /><line x1="6" x2="6" y1="2" y2="4" /><line x1="10" x2="10" y1="2" y2="4" /><line x1="14" x2="14" y1="2" y2="4" /></Icon>;
+        const Sparkles = (props) => <Icon {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M9 3v4" /><path d="M7 5h4" /><path d="M3 7h4" /></Icon>;
+        const Brain = (props) => <Icon {...props}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" /><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" /></Icon>;
+        const Cpu = (props) => <Icon {...props}><rect x="4" y="4" width="16" height="16" rx="2" /><rect x="9" y="9" width="6" height="6" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" /></Icon>;
+        const Lightbulb = (props) => <Icon {...props}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" /></Icon>;
+        const Activity = (props) => <Icon {...props}><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></Icon>;
+        const Sun = (props) => <Icon {...props}><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></Icon>;
+        const Sprout = (props) => <Icon {...props}><path d="M7 20h10" /><path d="M10 20c5.5-2.5.8-6.4 3-10" /><path d="M9.5 9.4c1.1.9 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z" /><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z" /></Icon>;
+
+        // --- HOOKS ---
+        const useMousePosition = () => {
+            const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+            useEffect(() => {
+                const updateMousePosition = (ev) => requestAnimationFrame(() => setMousePosition({ x: ev.clientX, y: ev.clientY }));
+                window.addEventListener('mousemove', updateMousePosition);
+                return () => window.removeEventListener('mousemove', updateMousePosition);
+            }, []);
+            return mousePosition;
+        };
+
+        const useOnScreen = (options) => {
+            const ref = useRef(null);
+            const [visible, setVisible] = useState(false);
+            useEffect(() => {
+                const observer = new IntersectionObserver(([entry]) => {
+                    if (entry.isIntersecting) {
+                        setVisible(true);
+                        observer.disconnect();
+                    }
+                }, options);
+                if (ref.current) observer.observe(ref.current);
+                return () => { if (ref.current) observer.unobserve(ref.current); };
+            }, [ref, options]);
+            return [ref, visible];
+        };
+
+        // --- COMPONENTS ---
+
+        // Custom Cursor
+        const CustomCursor = () => {
+            const { x, y } = useMousePosition();
+            const cursorRef = useRef(null);
+
+            useEffect(() => {
+                if (cursorRef.current) {
+                    cursorRef.current.animate({
+                        transform: `translate(${x - 24}px, ${y - 24}px)`
+                    }, {
+                        duration: 500,
+                        fill: "forwards",
+                        easing: "cubic-bezier(0.19, 1, 0.22, 1)" // Organic ease
+                    });
+                }
+            }, [x, y]);
+
+            return (
+                <div
+                    ref={cursorRef}
+                    className="fixed top-0 left-0 w-12 h-12 rounded-full pointer-events-none z-[100] custom-cursor"
+                />
+            );
+        };
+
+        const ScrambleText = ({ text, className }) => {
+            const [display, setDisplay] = useState(text);
+            const [ref, visible] = useOnScreen({ threshold: 0.5 });
+            const chars = "!@#$%^&*()_+{}:<>?~";
+
+            useEffect(() => {
+                if (!visible) return;
+                // Pre-calculate to avoid jitter
+                setDisplay(text.split("").map(() => chars[Math.floor(Math.random() * chars.length)]).join(""));
+
+                let iteration = 0;
+                const interval = setInterval(() => {
+                    setDisplay(
+                        text.split("").map((letter, index) => {
+                            if (index < iteration) return text[index];
+                            return chars[Math.floor(Math.random() * chars.length)];
+                        }).join("")
+                    );
+                    if (iteration >= text.length) clearInterval(interval);
+                    iteration += 1 / 3;
+                }, 30);
+                return () => clearInterval(interval);
+            }, [visible, text]);
+
+            // Wrapped in a span with tabular-nums to reduce width variance jitter
+            return <span ref={ref} className={`${className} tabular-nums inline-block`}>{display}</span>;
+        };
+
+        const ProjectCard = ({ title, category, year, color, description, icon: IconComponent }) => {
+            const [isHovered, setIsHovered] = useState(false);
+            return (
+                <div
+                    className="group relative w-full md:w-[450px] flex-shrink-0 cursor-pointer"
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
+                    <div
+                        className={`w-full h-64 rounded-2xl transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden border border-gray-100 ${isHovered ? 'rounded-[40%_60%_70%_30%/40%_50%_60%_50%] scale-[1.02]' : ''}`}
+                        style={{ backgroundColor: color }}
+                    >
+                        <div className="w-full h-full flex flex-col items-center justify-center p-8 opacity-60 text-gray-800 transition-all duration-500 group-hover:opacity-100">
+                            <IconComponent size={64} strokeWidth={1} />
+                            {isHovered && (
+                                <p className="mt-4 text-center text-xs font-semibold uppercase tracking-wider animate-in fade-in slide-in-from-bottom-2 duration-300">{description}</p>
+                            )}
+                        </div>
+                    </div>
+                    <div className="mt-6 flex justify-between items-end px-2">
+                        <div>
+                            <p className="text-xs font-medium tracking-widest uppercase text-gray-500 mb-1">{category} — {year}</p>
+                            <h3 className="text-2xl font-serif text-gray-800 italic group-hover:translate-x-2 transition-transform duration-300 ease-out">{title}</h3>
+                        </div>
+                        <div className={`w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center transition-all duration-500 ease-out ${isHovered ? 'bg-gray-800 text-white rotate-45 scale-110' : 'bg-white text-gray-800'}`}>
+                            <ArrowUpRight size={18} />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const BentoItem = ({ children, className, delay = 0 }) => {
+            const [ref, visible] = useOnScreen({ threshold: 0.1 });
+            return (
+                <div
+                    ref={ref}
+                    className={`bg-white/40 backdrop-blur-md border border-white/60 rounded-3xl p-8 transition-all duration-1000 transform ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} ${className} hover:shadow-xl hover:shadow-gray-200/40 hover:-translate-y-1 transition-all duration-500`}
+                    style={{ transitionDelay: `${delay}ms` }}
+                >
+                    {children}
+                </div>
+            );
+        };
+
+        const ExperienceCard = ({ role, companies, period, current }) => (
+            <div className="relative pl-8 border-l border-gray-200 pb-12 last:pb-0 hover:border-gray-800 transition-colors duration-500 group">
+                <div className="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-gray-200 ring-4 ring-[#FDFBF7] group-hover:bg-gray-900 transition-colors duration-500"></div>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#8c6b68] mb-2">{period} {current && <span className="ml-2 px-2 py-0.5 bg-[#E6D0CE]/50 rounded text-[10px] text-gray-800">Currently Pursuing</span>}</p>
+                <h3 className="text-xl font-serif italic mb-1 text-gray-900">{role}</h3>
+                <p className="text-gray-500 text-sm font-medium">{companies}</p>
+            </div>
+        );
+
+        // --- MAIN APP ---
+        function App() {
+            const { x, y } = useMousePosition();
+            const [scrolled, setScrolled] = useState(false);
+            const [copied, setCopied] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const handleCopyEmail = () => {
+                navigator.clipboard.writeText("naandhenysv2004@gmail.com");
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            };
+
+            return (
+                <div className="min-h-screen bg-[#FDFBF7] text-[#2C2C2C] overflow-x-hidden selection:bg-[#E6D0CE] selection:text-[#2C2C2C] font-sans relative">
+                    <CustomCursor />
+
+                    {/* Background Noise Texture */}
+                    <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0 mix-blend-multiply"
+                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
+                    </div>
+
+                    {/* Dynamic Aura Orb */}
+                    <div
+                        className="fixed w-[600px] h-[600px] rounded-full bg-gradient-to-r from-[#E6D0CE]/40 to-[#D4E0D9]/40 blur-[100px] pointer-events-none z-0 transition-transform duration-[2000ms] ease-out will-change-transform mix-blend-multiply"
+                        style={{ transform: `translate(${x * 0.1}px, ${y * 0.1}px)`, top: '-10%', left: '-10%' }}
+                    />
+                    <div
+                        className="fixed w-[400px] h-[400px] rounded-full bg-gradient-to-r from-purple-100/40 to-blue-100/40 blur-[80px] pointer-events-none z-0 transition-transform duration-[3000ms] ease-out will-change-transform mix-blend-multiply"
+                        style={{ transform: `translate(${x * -0.05}px, ${y * -0.05}px)`, bottom: '10%', right: '0%' }}
+                    />
+
+                    {/* Navigation */}
+                    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled ? 'py-4 bg-[#FDFBF7]/80 backdrop-blur-md border-b border-gray-100' : 'py-8 bg-transparent'}`}>
+                        <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
+                            <div className="text-xl font-serif italic font-bold tracking-tight z-50">naandheny.</div>
+                            <div className="hidden md:flex gap-8 text-sm uppercase tracking-widest text-gray-500 font-medium absolute left-1/2 -translate-x-1/2">
+                                <a href="#about" className="hover:text-black transition-colors">Philosophy</a>
+                                <a href="#experience" className="hover:text-black transition-colors">Experience</a>
+                                <a href="#work" className="hover:text-black transition-colors">Work</a>
+                                <a href="#contact" className="hover:text-black transition-colors">Connect</a>
+                            </div>
+                            <button
+                                onClick={handleCopyEmail}
+                                className="group flex items-center gap-2 px-5 py-2.5 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all active:scale-95 z-50"
+                            >
+                                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                <span className="text-xs font-bold tracking-wide">{copied ? "Copied!" : "Let's Talk"}</span>
+                            </button>
+                        </div>
+                    </nav>
+
+                    {/* Hero Section */}
+                    <section className="relative z-10 pt-48 pb-32 px-6 md:px-12 max-w-7xl mx-auto">
+                        <div className="grid md:grid-cols-2 gap-12 items-start">
+                            <div className="max-w-4xl pt-12">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E6D0CE]/30 border border-[#E6D0CE] text-[#8c6b68] text-xs font-bold uppercase tracking-widest mb-8 animate-fade-in-up">
+                                    <Sparkles size={12} />
+                                    <span>Electronics & Communication</span>
+                                </div>
+
+                                <div className="min-h-[120px] md:min-h-[160px] flex flex-col justify-center">
+                                    <h1 className="text-6xl md:text-8xl font-medium leading-[0.95] tracking-tight mb-8">
+                                        <span className="block font-serif italic text-gray-400 opacity-60">Building</span>
+                                        <ScrambleText text="Smart Future" className="block text-gray-900" />
+                                        <span className="block font-serif italic pl-12 md:pl-24">with Silicon.</span>
+                                    </h1>
+                                </div>
+
+                                <p className="text-lg md:text-xl text-gray-500 max-w-lg leading-relaxed mb-12 animate-fade-in-up delay-300">
+                                    Bridging the gap between hardware and software. I design intelligent IoT and Embedded solutions that solve real-world problems.
+                                </p>
+
+                                <div className="flex items-center gap-6 animate-fade-in-up delay-500">
+                                    <a href="#work" className="h-14 w-14 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-900 hover:border-gray-900 hover:text-white transition-all duration-300 group">
+                                        <MoveRight className="group-hover:translate-x-1 transition-transform" />
+                                    </a>
+                                    <span className="text-sm uppercase tracking-widest text-gray-400">View Projects</span>
+                                </div>
+                            </div>
+                            <div className="relative justify-self-end mt-12 md:mt-24">
+                                <div className="relative w-80 h-96 md:w-[400px] md:h-[500px]">
+                                    <div className="absolute inset-0 bg-[#E6D0CE] rounded-[100px_0px_100px_0px] rotate-6 opacity-30"></div>
+                                    <img
+                                        src="./profile-pic-new.jpg"
+                                        alt="Naandheny SV"
+                                        className="absolute inset-0 w-full h-full object-cover rounded-[100px_0px_100px_0px] shadow-2xl transition-all duration-700 hover:scale-[1.02]"
+                                    />
+                                    <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg border border-gray-100">
+                                        <p className="font-serif italic text-sm">Naandheny SV</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Experience Section */}
+                    <section id="experience" className="relative z-10 py-12 px-6 md:px-12 max-w-7xl mx-auto">
+                        <div className="grid md:grid-cols-3 gap-12">
+                            <div>
+                                <h2 className="text-4xl font-serif italic mb-4">Experience</h2>
+                                <div className="h-1 w-20 bg-gray-900 rounded-full mb-6"></div>
+                                <p className="text-gray-500 max-w-xs">My professional journey in the embedded systems industry.</p>
+                            </div>
+                            <div className="md:col-span-2 pt-4">
+                                <ExperienceCard
+                                    role="Sourcing Analyst"
+                                    companies="GEP Solutions"
+                                    period="Present"
+                                    current={true}
+                                />
+                                {/* Add more experience here if needed */}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Philosophy / Bento Grid Section */}
+                    <section id="about" className="relative z-10 py-32 px-6 md:px-12 max-w-7xl mx-auto">
+                        <div className="mb-20">
+                            <h2 className="text-4xl font-serif italic mb-4">The Methodology</h2>
+                            <div className="h-1 w-20 bg-gray-900 rounded-full"></div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
+                            {/* Main Statement */}
+                            <BentoItem className="md:col-span-2 md:row-span-2 flex flex-col justify-between bg-gradient-to-br from-white to-[#f4f1ea]">
+                                <div className="w-16 h-16 bg-[#E6D0CE]/20 rounded-2xl flex items-center justify-center mb-6">
+                                    <Brain className="text-[#bf9692]" size={32} />
+                                </div>
+                                <div>
+                                    <h3 className="text-3xl font-medium mb-4 leading-tight">Hardware <br /><span className="font-serif italic text-[#8DA399]">Meets Intelligence.</span></h3>
+                                    <p className="text-gray-500 leading-relaxed max-w-md">
+                                        I am a final-year student at Kumaraguru College of Technology (CGPA 8.4) with a passion for extracting logic from silicon. From designing PCB layouts to coding Machine Learning algorithms for edge devices, I thrive on making things "smart."
+                                    </p>
+                                </div>
+                            </BentoItem>
+
+                            {/* Stack */}
+                            <BentoItem className="bg-[#D4E0D9]/30" delay={100}>
+                                <div className="flex justify-between items-start mb-4">
+                                    <h4 className="text-sm font-bold uppercase tracking-widest text-[#5c7066]">Skill Stack</h4>
+                                    <Cpu size={24} className="text-[#5c7066]" />
+                                </div>
+                                <div className="flex flex-wrap gap-2 mt-8">
+                                    {['Python', 'C', 'IoT', 'Embedded Systems', 'VLSI', 'MATLAB', 'ML'].map(tag => (
+                                        <span key={tag} className="px-4 py-2 rounded-full bg-white/60 text-base font-semibold text-gray-700 border border-white/50">{tag}</span>
+                                    ))}
+                                </div>
+                            </BentoItem>
+
+                            {/* Quote */}
+                            <BentoItem className="bg-[#EAEAEA]/40 flex flex-col justify-center items-center text-center" delay={200}>
+                                <div className="w-24 h-24 mb-4 opacity-80 flex items-center justify-center">
+                                    <Lightbulb size={48} className="text-gray-600" strokeWidth={1} />
+                                </div>
+                                <p className="font-serif italic text-lg text-gray-600">"Innovation keeps the lights on."</p>
+                            </BentoItem>
+                        </div>
+                    </section>
+
+                    {/* Horizontal Scroll Gallery */}
+                    <section id="work" className="relative z-10 py-32 border-t border-gray-200/50">
+                        <div className="px-6 md:px-12 max-w-7xl mx-auto mb-16 flex justify-between items-end">
+                            <div>
+                                <h2 className="text-4xl font-serif italic mb-2">Selected Works</h2>
+                                <p className="text-gray-400">2023 — Present</p>
+                            </div>
+                            <div className="hidden md:flex gap-2 text-sm font-bold uppercase tracking-widest text-gray-300">
+                                <span>Scroll</span>
+                                <MoveRight />
+                            </div>
+                        </div>
+
+                        {/* Scroll Container */}
+                        <div className="overflow-x-auto pb-20 hide-scrollbar cursor-grab active:cursor-grabbing">
+                            <div className="flex px-6 md:px-12 gap-8 w-max">
+                                <ProjectCard
+                                    title="Wearable Fall Detection"
+                                    category="IoT / ML"
+                                    year="2024"
+                                    color="#F2EFE9"
+                                    description="Safety device using RPi 4 & IMU sensors."
+                                    icon={Activity}
+                                />
+                                <ProjectCard
+                                    title="Dual-Axis Solar Tracker"
+                                    category="Embedded / C"
+                                    year="2022"
+                                    color="#E8EEF1"
+                                    description="Automated panel alignment system."
+                                    icon={Sun}
+                                />
+                                <ProjectCard
+                                    title="Smart Irrigation"
+                                    category="Automation"
+                                    year="2020"
+                                    color="#F5F5F5"
+                                    description="Water regulation using soil moisture sensors."
+                                    icon={Sprout}
+                                />
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Footer / Contact */}
+                    <section id="contact" className="relative z-10 py-32 px-6 md:px-12 max-w-7xl mx-auto text-center">
+                        <div className="inline-block p-4 rounded-full bg-white shadow-sm border border-gray-100 mb-8 animate-bounce-slow">
+                            <Mail className="text-gray-400" />
+                        </div>
+
+                        <h2 className="text-5xl md:text-7xl font-serif italic mb-8 text-gray-800">
+                            Ready to collaborate?
+                        </h2>
+
+                        <button
+                            onClick={handleCopyEmail}
+                            className="relative group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#2C2C2C] text-white hover:bg-[#E6D0CE] hover:text-[#2C2C2C] transition-all duration-300 overflow-hidden"
+                        >
+                            <span className="relative z-10 text-lg font-medium">{copied ? "Email Copied!" : "naandhenysv2004@gmail.com"}</span>
+                            <Copy size={18} className="relative z-10" />
+                        </button>
+
+                        <div className="mt-24 pt-12 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-gray-400 uppercase tracking-widest">
+                            <p>© 2024 Naandheny SV. All rights reserved.</p>
+                            <div className="flex gap-6">
+                                <a href="https://www.linkedin.com/in/naandheny-vijayan" className="hover:text-gray-900 transition-colors"><Linkedin size={20} /></a>
+                                <a href="#" className="hover:text-gray-900 transition-colors"><Github size={20} /></a>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Floating Dock (Magnetic Nav) */}
+                    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40">
+                        <div className="flex items-center gap-2 px-3 py-3 rounded-2xl bg-white/70 backdrop-blur-xl border border-white/50 shadow-lg shadow-gray-200/20">
+                            {[
+                                { icon: <Star size={20} />, label: "Home", href: "#" },
+                                { icon: <Coffee size={20} />, label: "Work", href: "#work" },
+                                { icon: <Mail size={20} />, label: "Contact", href: "#contact" }
+                            ].map((item, idx) => (
+                                <a
+                                    key={idx}
+                                    href={item.href}
+                                    className="relative group p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300 hover:-translate-y-2 hover:scale-110 flex items-center justify-center"
+                                >
+                                    <span className="text-gray-600 group-hover:text-gray-900">{item.icon}</span>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
